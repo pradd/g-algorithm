@@ -1,7 +1,6 @@
 name:                g-algorithm
 version:             0.1.0.0
 license:             PublicDomain
-license-file:        LICENSE
 author:              Pradd
 maintainer:          pradd.me@gmail.com
 build-type:          Simple
