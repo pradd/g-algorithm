@@ -1,16 +1,16 @@
 module Main where
 
-main :: IO ()
-main = interact (writeDna . processDna . readDna)
+import Mutator (DNA (..), iterateDna)
 
-data DNA = DNA Int
+main :: IO ()
+main = interact process
+
+process :: String -> String
+process = writeDna . iterateDna 5 . readDna
 
 readDna :: String -> DNA
 readDna s = DNA $ read s 
 
-processDna :: DNA -> [DNA]
-processDna (DNA x) = [DNA (x - 1), DNA x, DNA (x + 1)]
-
-writeDna :: [DNA] -> String
-writeDna l = unlines $ map dnaToString l
+writeDna :: DNA -> String
+writeDna l = dnaToString l
     where dnaToString (DNA x) = show x
