@@ -1,12 +1,19 @@
 module Main where
 
+import System.Environment (getArgs)
 import Mutator (DNA (..), iterateDna)
 
 main :: IO ()
-main = interact process
+main = do   args <- getArgs
+            interact (process $ parseArgs args)
 
-process :: String -> String
-process = writeDna . iterateDna 5 . readDna
+data Args = Args {iterations :: Int}
+
+parseArgs :: [String] -> Args
+parseArgs ss = Args {iterations = read $ head ss}
+
+process :: Args -> String -> String
+process args = writeDna . iterateDna (iterations args) . readDna
 
 readDna :: String -> DNA
 readDna s = DNA $ read s 
