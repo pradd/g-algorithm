@@ -1,7 +1,9 @@
 module Mutator (mutateDna) where
 
+import System.Random (StdGen, randomR)
+
 import Dna
 
-mutateDna :: DNA -> DNA
-mutateDna (DNA x) | x < 0 = DNA (x + 1)
-                  | x >= 0 = DNA (x - 1)
+mutateDna :: (StdGen, DNA) -> DNA
+mutateDna (rnd, (DNA x)) = DNA (x + r)
+    where   r = fst $ randomR (-5, 5) rnd  

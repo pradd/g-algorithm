@@ -2,16 +2,21 @@ module Evaluator (evaluate) where
 
 import Data.List (sortBy)
 import Data.Function (on)
+import System.Random (StdGen, split)
 
 import Dna
-import Mutator(mutateDna)
+import Mutator (mutateDna)
 import qualified Config
 
-evaluate :: Int -> [DNA] -> [DNA]
-evaluate 0 xdna = xdna
-evaluate i xdna = evaluate (i-1) (filterByScore $ concat $ map f xdna)
+evaluate :: StdGen -> Int -> [DNA] -> [DNA]
+evaluate _   0 xdna = xdna
+evaluate rnd i xdna = evaluate (head rs) (i-1) (filterByScore $ concat $ map f xdna)
     where   f :: DNA -> [(DNA, Score)]
-            f dna = map (calcScore . mutateDna) $ breed dna
+            f dna = map (calcScore . mutateDna) $ zip (tail rs) $ breed dna
+            rs = randomGens rnd
+
+randomGens ::  StdGen -> [StdGen]
+randomGens rnd = iterate (fst . split) rnd
 
 breed :: DNA -> [DNA]
 breed = replicate Config.fertility
