@@ -1,4 +1,4 @@
-module Evaluator (evaluate) where
+module Evaluator (evolve) where
 
 import Data.List (sortBy)
 import Data.Function (on)
@@ -7,6 +7,9 @@ import System.Random (StdGen, split)
 import Dna
 import Mutator (mutateDna)
 import qualified Config
+
+evolve :: StdGen -> [DNA] -> [DNA]
+evolve rnd xdna = evaluate rnd Config.iterations xdna
 
 evaluate :: StdGen -> Int -> [DNA] -> [DNA]
 evaluate _   0 xdna = xdna
