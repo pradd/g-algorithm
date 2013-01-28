@@ -5,22 +5,23 @@ import Data.Function (on)
 
 import Dna
 import Mutator(mutateDna)
+import qualified Config
 
 evaluate :: Int -> [DNA] -> [DNA]
 evaluate 0 xdna = xdna
 evaluate i xdna = evaluate (i-1) (filterByScore $ concat $ map f xdna)
     where   f :: DNA -> [(DNA, Score)]
-            f dna = map (score . mutateDna) $ breed dna
+            f dna = map (calcScore . mutateDna) $ breed dna
 
 breed :: DNA -> [DNA]
-breed = replicate 3
+breed = replicate Config.fertility
 
-score :: DNA -> (DNA, Score)
-score d@(DNA x) = (d, abs x)
+calcScore :: DNA -> (DNA, Score)
+calcScore d = (d, Config.score d)
 
 filterByScore :: [(DNA, Score)] -> [DNA]
 filterByScore ps = selectNewGeneration $ map fst $ sortBy (compare `on` snd) ps
 
 selectNewGeneration :: [DNA] -> [DNA]
-selectNewGeneration xs | length xs <= 100 = xs
-                       | otherwise = take 100 xs
+selectNewGeneration xs | length xs <= Config.maxPopulation = xs
+                       | otherwise = take Config.maxPopulation xs
