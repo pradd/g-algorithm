@@ -1,7 +1,9 @@
 module Main where
 
 import System.Environment (getArgs)
-import Mutator (DNA (..), iterateDna)
+
+import Dna (DNA(..))
+import Evaluator (evaluate)
 
 main :: IO ()
 main = do   args <- getArgs
@@ -13,11 +15,11 @@ parseArgs :: [String] -> Args
 parseArgs ss = Args {iterations = read $ head ss}
 
 process :: Args -> String -> String
-process args = writeDna . iterateDna (iterations args) . readDna
+process args = writeDna . evaluate (iterations args) . readDna
 
-readDna :: String -> DNA
-readDna s = DNA $ read s 
+readDna :: String -> [DNA]
+readDna s = map (DNA . read) (lines s) 
 
-writeDna :: DNA -> String
-writeDna l = dnaToString l
+writeDna :: [DNA] -> String
+writeDna dnas = unlines $ map dnaToString dnas
     where dnaToString (DNA x) = show x
