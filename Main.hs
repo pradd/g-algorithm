@@ -3,7 +3,7 @@ module Main where
 import System.Random (StdGen, newStdGen)
 
 import Dna (DNA(..))
-import Evaluator (evolve)
+import Evolver (evolve)
 
 main :: IO ()
 main = do   rnd <- newStdGen

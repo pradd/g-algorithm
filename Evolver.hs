@@ -1,4 +1,4 @@
-module Evaluator (evolve) where
+module Evolver (evolve) where
 
 import Data.List (sortBy)
 import Data.Function (on)
