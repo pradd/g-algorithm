@@ -13,13 +13,16 @@ evolve rnd xdna = evaluate rnd Config.iterations xdna
 
 evaluate :: StdGen -> Int -> [DNA] -> [DNA]
 evaluate _   0 xdna = xdna
-evaluate rnd i xdna = evaluate (head rs) (i-1) (filterByScore $ concat $ map f xdna)
-    where   f :: DNA -> [(DNA, Score)]
-            f dna = map (calcScore . mutateDna) $ zip (tail rs) $ breed dna
-            rs = randomGens rnd
+evaluate rnd i xdna = evaluate seed (i-1) $ liveCycle seeds xdna
+    where  (seed:seeds) = splitRandomGens rnd
 
-randomGens ::  StdGen -> [StdGen]
-randomGens rnd = iterate (fst . split) rnd
+splitRandomGens ::  StdGen -> [StdGen]
+splitRandomGens rnd = iterate (fst . split) rnd
+
+liveCycle :: [StdGen] -> [DNA] -> [DNA]
+liveCycle seeds dnas = filterByScore $ concatMap breedPopulation dnas
+    where   breedPopulation :: DNA -> [(DNA, Score)]
+            breedPopulation dna = map (calcScore . mutateDna) $ zip seeds $ breed dna
 
 breed :: DNA -> [DNA]
 breed = replicate Config.fertility
