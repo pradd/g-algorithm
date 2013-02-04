@@ -1,4 +1,4 @@
-module Utils (duplicate) where
+module Utils (duplicate, replace) where
 
 duplicate :: Int -> Int -> [a] -> [a]
 duplicate start end xs = headSequence (start-1) xs ++ duplicatedSequence (start-1) end xs ++ tailSequence end xs
@@ -12,3 +12,6 @@ duplicatedSequence start end xs = extract ++ extract
 
 tailSequence :: Int -> [a] -> [a]
 tailSequence index xs = drop index xs 
+
+replace :: Int -> a -> [a] -> [a]
+replace i x xs = headSequence i xs ++ [x] ++ tailSequence (i+1) xs
