@@ -13,16 +13,30 @@ evolve rnd xdna = evaluate rnd Config.iterations xdna
 
 evaluate :: StdGen -> Int -> [DNA] -> [DNA]
 evaluate _   0 xdna = xdna
-evaluate rnd i xdna = evaluate seed (i-1) $ liveCycle seeds xdna
-    where  (seed:seeds) = splitRandomGens rnd
+evaluate rnd i xdna = evaluate rnd' (i-1) dnas
+    where  (rnd', dnas) = liveCycle rnd xdna
 
-splitRandomGens ::  StdGen -> [StdGen]
-splitRandomGens rnd = iterate (fst . split) rnd
+liveCycle :: StdGen -> [DNA] -> (StdGen, [DNA])
+liveCycle rnd dnas = (rnd', dnas')
+    where   (rnd', xs) = breedPopulation' rnd dnas
+            dnas' = filterByScore xs
 
-liveCycle :: [StdGen] -> [DNA] -> [DNA]
-liveCycle seeds dnas = filterByScore $ concatMap breedPopulation dnas
-    where   breedPopulation :: DNA -> [(DNA, Score)]
-            breedPopulation dna = map (calcScore . mutateDna) $ zip seeds $ breed dna
+breedPopulation' :: StdGen -> [DNA] -> (StdGen, [(DNA, Score)])
+breedPopulation' rnd []     = (rnd, [])
+breedPopulation' rnd (x:xs) = (rnd'', x' ++ xs')
+    where   (rnd', x')   = breedPopulation rnd x
+            (rnd'', xs') = breedPopulation' rnd' xs      
+
+
+breedPopulation :: StdGen -> DNA -> (StdGen, [(DNA, Score)])
+breedPopulation rnd dna = (rnd', map calcScore mutated)
+    where   (rnd', mutated) = iterateMutateDna rnd $ breed dna 
+
+iterateMutateDna :: StdGen -> [DNA] -> (StdGen, [DNA])
+iterateMutateDna rnd []     = (rnd , []) 
+iterateMutateDna rnd (x:xs) = (rnd'', dna : dnas)
+    where   (rnd' , dna ) = mutateDna (rnd, x)
+            (rnd'', dnas) = iterateMutateDna rnd' xs
 
 breed :: DNA -> [DNA]
 breed = replicate Config.fertility

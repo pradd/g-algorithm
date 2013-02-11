@@ -5,14 +5,12 @@ import System.Random (StdGen, randomR, randomRs)
 import Dna (DNA(..), genes)
 import Utils (duplicate, replace, delete, extract, insert)
 
-type Mutation = StdGen -> DNA -> DNA
-
-mutateDna :: (StdGen, DNA) -> DNA
+mutateDna :: (StdGen, DNA) -> (StdGen, DNA)
 mutateDna (rnd, dna) = (mutations !! mutationIndex) seed dna
     where   (mutationIndex, seed) = randomR mutationsRange rnd
             mutationsRange = (0, (length mutations) -1)
 
-mutations :: [Mutation]
+mutations :: [StdGen -> DNA -> (StdGen, DNA)]
 mutations = [ noMutation
             , duplicateMutation
             , atomicMutation
@@ -20,34 +18,38 @@ mutations = [ noMutation
             , moveMutation
             ]
 
-noMutation :: Mutation
-noMutation _ = id
+noMutation :: StdGen -> DNA -> (StdGen, DNA)
+noMutation rnd dna = (rnd, dna)
 
-duplicateMutation :: Mutation
-duplicateMutation rnd (DNA dna) = DNA $ duplicate start end dna
-    where       (index1:index2:_) = randomRs (1, (length dna)) rnd
+duplicateMutation :: StdGen -> DNA -> (StdGen, DNA)
+duplicateMutation rnd (DNA dna) = (rnd'', DNA $ duplicate start end dna)
+    where       (index1, rnd') = randomR range rnd
+                (index2, rnd'') = randomR range rnd'
+                range = (1, (length dna))
                 start = min index1 index2
                 end = max index1 index2
 
-atomicMutation :: Mutation
-atomicMutation rnd (DNA dna) = DNA $ replace i newGene dna
-    where       (i, seed) = randomR (0, (length dna)-1) rnd
+atomicMutation :: StdGen -> DNA -> (StdGen, DNA)
+atomicMutation rnd (DNA dna) = (rnd'', DNA $ replace i newGene dna)
+    where       (i, rnd') = randomR (0, (length dna)-1) rnd
                 newGene = genes !! j
-                (j, _) = randomR (0, (length genes)-1) seed
+                (j, rnd'') = randomR (0, (length genes)-1) rnd'
 
-moveMutation :: Mutation
-moveMutation rnd (DNA dna) = DNA $ insert destination transposone transitionalDna
-    where       (index1, seed1) = randomR (1, (length dna)) rnd
-                (index2, seed2) = randomR (1, (length dna)) seed1
+moveMutation :: StdGen -> DNA -> (StdGen, DNA)
+moveMutation rnd (DNA dna) = (rnd''', DNA $ insert destination transposone transitionalDna)
+    where       (index1, rnd') = randomR (1, (length dna)) rnd
+                (index2, rnd'') = randomR (1, (length dna)) rnd'
                 start = min index1 index2
                 end = max index1 index2
                 transposone = extract start end dna
                 transitionalDna = delete start end dna
-                (destination, _) = randomR (1, (length transitionalDna)) seed2
+                (destination, rnd''') = randomR (1, (length transitionalDna)) rnd''
 
-deleteMutation :: Mutation
-deleteMutation rnd (DNA dna) = DNA $ safeDelete start end dna
-    where       (index1:index2:_) = randomRs (1, (length dna)) rnd
+deleteMutation :: StdGen -> DNA -> (StdGen, DNA)
+deleteMutation rnd (DNA dna) = (rnd'', DNA $ safeDelete start end dna)
+    where       (index1, rnd') = randomR range rnd
+                (index2, rnd'') = randomR range rnd'
+                range = (1, (length dna))
                 start = min index1 index2
                 end = max index1 index2
 
