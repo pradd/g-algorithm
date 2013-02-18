@@ -5,8 +5,8 @@ import System.Random (StdGen, randomR, randomRs)
 import Dna (DNA(..), genes)
 import Utils (duplicate, replace, delete, extract, insert)
 
-mutateDna :: (StdGen, DNA) -> (StdGen, DNA)
-mutateDna (rnd, dna) = (mutations !! mutationIndex) seed dna
+mutateDna :: StdGen -> DNA -> (StdGen, DNA)
+mutateDna rnd dna = (mutations !! mutationIndex) seed dna
     where   (mutationIndex, seed) = randomR mutationsRange rnd
             mutationsRange = (0, (length mutations) -1)
 

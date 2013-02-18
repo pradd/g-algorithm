@@ -35,7 +35,7 @@ breedPopulation rnd dna = (rnd', map calcScore mutated)
 iterateMutateDna :: StdGen -> [DNA] -> (StdGen, [DNA])
 iterateMutateDna rnd []     = (rnd , []) 
 iterateMutateDna rnd (x:xs) = (rnd'', dna : dnas)
-    where   (rnd' , dna ) = mutateDna (rnd, x)
+    where   (rnd', dna)   = mutateDna rnd x
             (rnd'', dnas) = iterateMutateDna rnd' xs
 
 breed :: DNA -> [DNA]
