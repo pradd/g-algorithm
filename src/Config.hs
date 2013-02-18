@@ -7,6 +7,8 @@ maxPopulation = 100 :: Int
 fertility = 3 :: Int
 iterations = 5 :: Int
 
+memSize = 100 :: Int
+
 score :: DNA -> Score
 score dna = theHigherTheBetter dna
 

@@ -1,6 +1,6 @@
 module Mutator (mutateDna) where
 
-import System.Random (StdGen, randomR, randomRs)
+import System.Random (StdGen, randomR)
 
 import Dna (DNA(..), genes)
 import Utils (duplicate, replace, delete, extract, insert)

@@ -1,7 +1,9 @@
 module Dna (DNA (..), Gene (..), Score, translate, genes) where 
 
+import VM (VM, inc, dec, prev, next, fwd, back)
+
 data DNA = DNA [Gene]
-data Gene = ADD1 | SUB1 | ADD5 | SUB5 deriving (Read, Show, Eq)
+data Gene = INC | DEC | PREV | NEXT | FWD | BACK deriving (Read, Show, Eq)
 
 translate :: Gene -> Int -> Int
 translate gene = snd $ head $ filter ((gene ==) . fst) opsMap
@@ -9,11 +11,15 @@ translate gene = snd $ head $ filter ((gene ==) . fst) opsMap
 genes :: [Gene]
 genes = map fst opsMap
 
-opsMap :: [(Gene, Int -> Int)]
-opsMap = [ (ADD1, \x -> x + 1)
-         , (SUB1, \x -> x - 1)
-         , (ADD5, \x -> x + 5)
-         , (SUB5, \x -> x - 5)
+opsMap :: [(Gene, VM -> VM)]
+opsMap = [ (INC, inc)
+         , (DEC, dec)
+         , (PREV, prev)
+         , (NEXT, next)
+         , (FWD, fwd)
+         , (BACK, back)
          ] 
+
+
 
 type Score = Int
