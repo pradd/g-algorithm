@@ -1,4 +1,4 @@
-module Utils (duplicate, replace, delete, extract, insert, change) where
+module Utils (duplicate, replace, delete, extract, insert) where
 
 duplicate :: Int -> Int -> [a] -> [a]
 duplicate start end xs = headSequence (start-1) xs ++ duplicatedSequence start end xs ++ tailSequence end xs
@@ -24,6 +24,3 @@ extract start end xs = take (end-start+1) (drop (start-1) xs)
 
 insert :: Int -> [a] -> [a] -> [a]
 insert i what to = headSequence (i-1) to ++ what ++ tailSequence (i-1) to
-
-change :: Int -> a -> [a] -> [a]
-change i val xs = replace i ((xs !! i) + val) xs

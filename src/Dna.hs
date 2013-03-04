@@ -1,12 +1,12 @@
-module Dna (DNA (..), Gene (..), Score, translate, genes) where 
+module Dna (DNA (..), Score, genes) where 
 
+import Gene (Gene(..))
 import VM (VM, inc, dec, prev, next, fwd, back)
 
 data DNA = DNA [Gene]
-data Gene = INC | DEC | PREV | NEXT | FWD | BACK deriving (Read, Show, Eq)
 
-translate :: Gene -> Int -> Int
-translate gene = snd $ head $ filter ((gene ==) . fst) opsMap
+--translate :: Gene -> Int -> Int
+--translate gene = snd $ head $ filter ((gene ==) . fst) opsMap
 
 genes :: [Gene]
 genes = map fst opsMap

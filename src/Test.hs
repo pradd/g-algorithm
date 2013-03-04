@@ -1,6 +1,9 @@
 module Test where
 
 import Utils (duplicate, replace, delete, extract, insert)
+import Gene
+import Memory (Memory(..), movMpForward, movMpBackward, add)
+import Program (Program(..), Operation(..), movPpForward, movPpBackward, jmpFwd, jmpBack)
 
 main = putStrLn $ unlines $ map test tests
 
@@ -36,5 +39,21 @@ tests = [ ("duplicate - happy path     ", duplicate 1 2 [1,2,3] == [1,2,1,2,3]  
         , ("insert - upper bound       ", insert 6 [6] [1,2,3,4,5] == [1,2,3,4,5,6]         )
         , ("insert - minimal list      ", insert 1 [1] [] == [1]                            )
         , ("insert - full list         ", insert 4 [] [1,2,3,4,5,6] == [1,2,3,4,5,6]        )
-        ]
+  
+        , ("Memory.add - middle        ", add 1 (Memory 2 [0,1,2,3]) == Memory 2 [0,1,3,3]   )
+        , ("Memory.add - lower bound   ", add 1 (Memory 0 [0,1]) == Memory 0 [1,1]           )
+        , ("Memory.add - upper bound   ", add 1 (Memory 3 [0,1,2,3]) == Memory 3 [0,1,2,4]   )
+        , ("Memory.add - decrement     ", add (-1) (Memory 2 [0,1,2,3]) == Memory 2 [0,1,1,3])
 
+        , ("Memory.movMpForward - middle ", movMpForward (Memory 1 [0,1,2]) == Memory 2 [0,1,2])
+        , ("Memory.movMpForward - start  ", movMpForward (Memory 0 [0,1,2]) == Memory 1 [0,1,2])
+        , ("Memory.movMpForward - end    ", movMpForward (Memory 2 [0,1,2]) == Memory 0 [0,1,2])
+
+        , ("Memory.movMpBackward - middle", movMpBackward (Memory 1 [0,1,2]) == Memory 0 [0,1,2])
+        , ("Memory.movMpBackward - start ", movMpBackward (Memory 0 [0,1,2]) == Memory 2 [0,1,2])
+        , ("Memory.movMpBackward - end   ", movMpBackward (Memory 2 [0,1,2]) == Memory 1 [0,1,2])
+
+        , ("Program.movPpBackward - middle", movPpBackward (Program (map Op [INC, FWD]) (Op DEC) (map Op [BACK, PREV, INC])) == Program (map Op [FWD]) (Op INC) (map Op [DEC, BACK, PREV, INC]))
+        , ("Program.movPpBackward - start ", movPpBackward (Program [] (Op DEC) (map Op [BACK, PREV, INC])) == Program [] Terminator (map Op [DEC, BACK, PREV, INC]))
+        , ("Program.movPpBackward - end   ", movPpBackward (Program (map Op [INC, FWD]) (Op DEC) []) == Program (map Op [FWD]) (Op INC) (map Op [DEC]))
+        ]
