@@ -2,10 +2,11 @@ module Program (Program(..), Operation(..), movPpForward, movPpBackward, jmpFwd,
 
 import Gene (Gene(..))
 
-data Program = Program [Operation] Operation [Operation] deriving (Eq)
-data Operation = Op Gene | Terminator deriving (Eq)
+data Program = Program [Operation] Operation [Operation] deriving (Eq, Show)
+data Operation = Op Gene | Terminator deriving (Eq, Show)
 
 movPpForward :: Program -> Program
+movPpForward p@(Program _ Terminator _) = p
 movPpForward (Program prevOps op nextOps) = Program (push' op prevOps) (head' nextOps) (tail' nextOps)
 
 movPpBackward :: Program -> Program
@@ -20,7 +21,6 @@ tail' [] = []
 tail' (_:xs) = xs
 
 push' :: Operation -> [Operation] -> [Operation]
-push' Terminator ops = ops
 push' op ops = op:ops
 
 reverse' :: Program -> Program
@@ -30,7 +30,7 @@ jmpFwd :: Program -> Program
 jmpFwd p = movPpForward $ traverse (Op BACK) (Op FWD) 0 $ movPpForward p
 
 jmpBack :: Program -> Program
-jmpBack p = movPpForward $ reverse' $ traverse (Op FWD) (Op BACK) 0 $ reverse' $ movPpBackward p
+jmpBack p = reverse' $ traverse (Op FWD) (Op BACK) 0 $ reverse' $ movPpBackward p
 
 traverse :: Operation -> Operation -> Int -> Program -> Program
 traverse _ _ _ p@(Program _ Terminator _) = p

@@ -4,7 +4,8 @@ import Data.List (sortBy)
 import Data.Function (on)
 import System.Random (StdGen, split)
 
-import Dna
+import Dna (DNA)
+import Scoring (Score, score)
 import Mutator (mutateDna)
 import qualified Config
 
@@ -42,7 +43,7 @@ breed :: DNA -> [DNA]
 breed = replicate Config.fertility
 
 calcScore :: DNA -> (DNA, Score)
-calcScore d = (d, Config.score d)
+calcScore d = (d, score d)
 
 filterByScore :: [(DNA, Score)] -> [DNA]
 filterByScore ps = selectNewGeneration $ map fst $ sortBy (compare `on` snd) ps

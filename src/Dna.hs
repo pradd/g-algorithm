@@ -1,4 +1,4 @@
-module Dna (DNA (..), Score, genes) where 
+module Dna (DNA (..), genes, opsMap) where 
 
 import Gene (Gene(..))
 import VM (VM, inc, dec, prev, next, fwd, back)
@@ -20,6 +20,3 @@ opsMap = [ (INC, inc)
          , (BACK, back)
          ] 
 
-
-
-type Score = Int

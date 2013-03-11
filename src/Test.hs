@@ -4,6 +4,7 @@ import Utils (duplicate, replace, delete, extract, insert)
 import Gene
 import Memory (Memory(..), movMpForward, movMpBackward, add)
 import Program (Program(..), Operation(..), movPpForward, movPpBackward, jmpFwd, jmpBack)
+import VM (VM(..), inc, dec, prev, next, fwd, back)
 
 main = putStrLn $ unlines $ map test tests
 
@@ -53,7 +54,29 @@ tests = [ ("duplicate - happy path     ", duplicate 1 2 [1,2,3] == [1,2,1,2,3]  
         , ("Memory.movMpBackward - start ", movMpBackward (Memory 0 [0,1,2]) == Memory 2 [0,1,2])
         , ("Memory.movMpBackward - end   ", movMpBackward (Memory 2 [0,1,2]) == Memory 1 [0,1,2])
 
-        , ("Program.movPpBackward - middle", movPpBackward (Program (map Op [INC, FWD]) (Op DEC) (map Op [BACK, PREV, INC])) == Program (map Op [FWD]) (Op INC) (map Op [DEC, BACK, PREV, INC]))
-        , ("Program.movPpBackward - start ", movPpBackward (Program [] (Op DEC) (map Op [BACK, PREV, INC])) == Program [] Terminator (map Op [DEC, BACK, PREV, INC]))
-        , ("Program.movPpBackward - end   ", movPpBackward (Program (map Op [INC, FWD]) (Op DEC) []) == Program (map Op [FWD]) (Op INC) (map Op [DEC]))
+        , ("Program.movPpForward - middle    ", movPpForward (Program (map Op [INC, FWD]) (Op DEC) (map Op [BACK, PREV, INC])) == Program (map Op [DEC, INC, FWD]) (Op BACK) (map Op [PREV, INC]))
+        , ("Program.movPpForward - start     ", movPpForward (Program [] (Op DEC) (map Op [BACK, PREV, INC])) == Program [Op DEC] (Op BACK) (map Op [PREV, INC]))
+        , ("Program.movPpForward - end       ", movPpForward (Program (map Op [INC, FWD]) (Op DEC) []) == Program (map Op [DEC, INC, FWD]) Terminator [])
+        , ("Program.movPpForward - terminator", movPpForward (Program [Op INC] Terminator [Op DEC]) == Program [Op INC] Terminator [Op DEC])
+
+        , ("Program.movPpBackward - middle    ", movPpBackward (Program (map Op [INC, FWD]) (Op DEC) (map Op [BACK, PREV, INC])) == Program (map Op [FWD]) (Op INC) (map Op [DEC, BACK, PREV, INC]))
+        , ("Program.movPpBackward - start     ", movPpBackward (Program [] (Op DEC) (map Op [BACK, PREV, INC])) == Program [] Terminator (map Op [DEC, BACK, PREV, INC]))
+        , ("Program.movPpBackward - end       ", movPpBackward (Program (map Op [INC, FWD]) (Op DEC) []) == Program (map Op [FWD]) (Op INC) (map Op [DEC]))
+        , ("Program.movPpBackward - terminator", movPpBackward (Program [Op INC] Terminator [Op DEC]) == Program [Op INC] Terminator [Op DEC])
+
+        , ("Program.jmpFwd - middle         ", jmpFwd (Program (map Op [INC, FWD]) (Op DEC) (map Op [BACK, PREV, INC])) == Program (map Op [BACK, DEC, INC, FWD]) (Op PREV) (map Op [INC]))
+        , ("Program.jmpFwd - inner brackets ", jmpFwd (Program (map Op [FWD]) (Op DEC) (map Op [FWD, INC, BACK, PREV, BACK, INC])) == Program (map Op [BACK, PREV, BACK, INC, FWD, DEC, FWD]) (Op INC) [])
+        , ("Program.jmpFwd - terminator     ", jmpFwd (Program (map Op [INC, FWD]) (Op DEC) [Op FWD]) == Program (map Op [FWD, DEC, INC, FWD]) Terminator [])
+
+        , ("Program.jmpBack - middle         ", jmpBack (Program (map Op [INC, FWD]) (Op DEC) (map Op [BACK, PREV, INC])) == Program [] (Op FWD) (map Op [INC, DEC, BACK, PREV, INC]))
+        , ("Program.jmpBack - inner brackets ", jmpBack (Program (map Op [BACK, INC, FWD, DEC, FWD]) (Op BACK) (map Op [INC])) == Program [] (Op FWD) (map Op [DEC, FWD, INC, BACK, BACK, INC]))
+        , ("Program.jmpBack - terminator     ", jmpBack (Program (map Op [INC]) (Op BACK) [Op FWD]) == Program [] Terminator (map Op [INC, BACK, FWD]))
+
+        , ("VM.inc                     ", inc (VM (Memory 0 [5]) (Program [] (Op INC) [])) == VM (Memory 0 [6]) (Program [Op INC] Terminator []))
+        , ("VM.dec                     ", dec (VM (Memory 0 [5]) (Program [] (Op DEC) [])) == VM (Memory 0 [4]) (Program [Op DEC] Terminator []))
+        , ("VM.prev                    ", prev (VM (Memory 1 [0,1,2]) (Program [] (Op PREV) [])) == VM (Memory 0 [0,1,2]) (Program [Op PREV] Terminator []))
+        , ("VM.next                    ", next (VM (Memory 0 [0,1,2]) (Program [] (Op NEXT) [])) == VM (Memory 1 [0,1,2]) (Program [Op NEXT] Terminator []))
+        , ("VM.fwd - rewind            ", fwd (VM (Memory 0 [0]) (Program [] (Op FWD) (map Op [BACK, PREV]))) == VM (Memory 0 [0]) (Program [Op BACK, Op FWD] (Op PREV) []))
+        , ("VM.fwd - into loop         ", fwd (VM (Memory 0 [1]) (Program [] (Op FWD) (map Op [INC, PREV]))) == VM (Memory 0 [1]) (Program [Op FWD] (Op INC) [Op PREV]))
+        , ("VM.back                    ", back (VM (Memory 0 [0]) (Program (map Op [PREV, FWD]) (Op BACK) [])) == VM (Memory 0 [0]) (Program [] (Op FWD) [Op PREV, Op BACK]))
         ]

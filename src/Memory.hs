@@ -2,7 +2,7 @@ module Memory (Memory(..), movMpForward, movMpBackward, add) where
 
 import Utils (replace)
 
-data Memory = Memory MemPointer [Int] deriving (Eq)
+data Memory = Memory MemPointer [Int] deriving (Eq, Show)
 
 type MemPointer = Int
 
