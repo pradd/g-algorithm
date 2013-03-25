@@ -46,7 +46,7 @@ calcScore :: DNA -> (DNA, Score)
 calcScore d = (d, score d)
 
 filterByScore :: [(DNA, Score)] -> [DNA]
-filterByScore ps = selectNewGeneration $ map fst $ sortBy (compare `on` snd) ps
+filterByScore ps = selectNewGeneration $ map fst $ reverse $ sortBy (compare `on` snd) ps
 
 selectNewGeneration :: [DNA] -> [DNA]
 selectNewGeneration xs | length xs <= Config.maxPopulation = xs
