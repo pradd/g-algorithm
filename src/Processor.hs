@@ -21,5 +21,8 @@ get key xs = snd $ head $ filter (\x->fst x==key) xs
 defaultVM :: DNA -> VM
 defaultVM dna = VM defaultMemory (defaultProgram dna)
 
+defaultMemory :: Memory
 defaultMemory = Memory 0 $ replicate Config.memSize 0
+
+defaultProgram :: DNA -> Program
 defaultProgram (DNA (d:dx)) = Program [] (Op d) (map Op dx)
